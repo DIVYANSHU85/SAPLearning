@@ -1,0 +1,12 @@
+{
+	"name": "SharedSelfIR",
+	"properties": {
+		"type": "SelfHosted",
+		"typeProperties": {
+			"linkedInfo": {
+				"resourceId": "/subscriptions/e4949961-e46f-4f60-bf96-032154cb62b7/resourcegroups/TestEnvironment/providers/Microsoft.DataFactory/factories/ADFDemoDivyanshu/integrationruntimes/selfHostedIRnew",
+				"authorizationType": "Rbac"
+			}
+		}
+	}
+}

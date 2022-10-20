@@ -1,0 +1,9 @@
+{
+	"name": "SAPLearningDivyanshu",
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "6a28bcfe-858b-41ed-b323-f68642307eac",
+		"tenantId": "5954577c-22bd-4fd8-8369-f6a50fbf6d0a"
+	}
+}
