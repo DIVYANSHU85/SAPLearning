@@ -1,0 +1,21 @@
+{
+	"name": "SAPFunctionalTable",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SapTable",
+		"typeProperties": {
+			"clientId": "100",
+			"language": "",
+			"sncMode": false,
+			"userName": "kjoshi",
+			"server": "fas.cognitusconsulting.com",
+			"systemNumber": "01",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJiZGIwNmNjYS1jYzAyLTQ2MzUtOTRiMS00YmIwY2Q0NjRjZjUiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "SharedSelfIR",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
