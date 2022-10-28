@@ -13,7 +13,19 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "LookUpTable",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
 			},
 			{
 				"name": "ForEach1",
@@ -28,9 +40,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"isSequential": true,
 					"activities": [
 						{
-							"name": "Copy data1",
+							"name": "CP_Full_SourceToStg",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -42,15 +55,37 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
+								"source": {
+									"type": "SapTableSource",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SqlServerSink",
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"tableOption": "autoCreate"
+								},
 								"enableStaging": false
-							}
+							},
+							"inputs": [
+								{
+									"referenceName": "SapTable",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "FullLoadTable",
+									"type": "DatasetReference"
+								}
+							]
 						},
 						{
-							"name": "Copy data2",
+							"name": "CP_Full_StgToDbo",
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "Copy data1",
+									"activity": "CP_Full_SourceToStg",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -65,15 +100,38 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SqlServerSink",
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"tableOption": "autoCreate"
+								},
 								"enableStaging": false
-							}
+							},
+							"inputs": [
+								{
+									"referenceName": "FullLoadTable",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "FullLoadDboTable",
+									"type": "DatasetReference"
+								}
+							]
 						},
 						{
-							"name": "Stored procedure1",
+							"name": "SP_ModifiedDate",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
-									"activity": "Copy data2",
+									"activity": "CP_Full_StgToDbo",
 									"dependencyConditions": [
 										"Succeeded"
 									]
