@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Lookup1",
+				"name": "LK_SAPDeltaTable",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -13,14 +13,27 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT * FROM dbo.SAP_Lookup WHERE LoadType = 'Delta'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "LookUpTable",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "FE_DeltaLoad",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Lookup1",
+						"activity": "LK_SAPDeltaTable",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -28,9 +41,14 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('LK_SAP').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
 					"activities": [
 						{
-							"name": "Copy data1",
+							"name": "CP_SAPtoStg",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -42,15 +60,62 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
+								"source": {
+									"type": "SapTableSource",
+									"rfcTableOptions": {
+										"value": "@{item().DeltaCondition}",
+										"type": "Expression"
+									},
+									"customRfcReadTableFunctionModule": "",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SqlServerSink",
+									"preCopyScript": {
+										"value": "@{concat('IF OBJECT_ID(','''',item().SinkSchemaName,'.',item().SinkTableName,'''',') IS NOT NULL\nTRUNCATE TABLE ',item().SinkSchemaName,'.',item().SinkTableName)}",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"tableOption": "autoCreate"
+								},
 								"enableStaging": false
-							}
+							},
+							"inputs": [
+								{
+									"referenceName": "SapTable",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableName": {
+											"value": "@item().SourceTableName",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_DeltaTable",
+									"type": "DatasetReference",
+									"parameters": {
+										"SinkSchemaName": {
+											"value": "@item().SinkSchemaName",
+											"type": "Expression"
+										},
+										"SinkTableName": {
+											"value": "@item().SinkTableName",
+											"type": "Expression"
+										}
+									}
+								}
+							]
 						},
 						{
-							"name": "Stored procedure1",
+							"name": "SP_DeltaLoad",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
-									"activity": "Copy data1",
+									"activity": "CP_SAPtoStg",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -63,17 +128,76 @@
 								"secureOutput": false,
 								"secureInput": false
 							},
-							"userProperties": []
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[usp_LoadTypeDeltaSTGtoDBO]",
+								"storedProcedureParameters": {
+									"SourceTableName": {
+										"value": {
+											"value": "@item().SourceTableName",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "SAPFunctional",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "SP_UpdateDeltaCondition",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "SP_DeltaLoad",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[usp_UpdateDeltaCondition]",
+								"storedProcedureParameters": {
+									"ModifiedDate": {
+										"value": {
+											"value": "@pipeline().TriggerTime",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"SourceTableName": {
+										"value": {
+											"value": "@item().SourceTableName",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "SAPFunctional",
+								"type": "LinkedServiceReference"
+							}
 						}
 					]
 				}
 			},
 			{
-				"name": "Lookup2",
+				"name": "LK_DependentTable",
 				"type": "Lookup",
 				"dependsOn": [
 					{
-						"activity": "ForEach1",
+						"activity": "FE_DeltaLoad",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -86,14 +210,27 @@
 					"secureOutput": false,
 					"secureInput": false
 				},
-				"userProperties": []
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT * FROM dbo.SAP_Lookup WHERE LoadType = 'Dependent Delta'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "LookUpTable",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
 			},
 			{
-				"name": "ForEach2",
+				"name": "FE_DependentDeltaLoad",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Lookup2",
+						"activity": "LK_DependentTable",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -101,26 +238,18 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('LK_DependentTable').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
 					"activities": [
 						{
-							"name": "Lookup3",
-							"type": "Lookup",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": []
-						},
-						{
-							"name": "Copy data2",
+							"name": "CP_SourceToStgDependent",
 							"type": "Copy",
 							"dependsOn": [
 								{
-									"activity": "Lookup3",
+									"activity": "LK_DependentDeltaCondtion",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -135,15 +264,55 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
+								"source": {
+									"type": "SapTableSource",
+									"partitionOption": "None"
+								},
 								"enableStaging": false
-							}
+							},
+							"inputs": [
+								{
+									"referenceName": "SapTable",
+									"type": "DatasetReference",
+									"parameters": {
+										"TableName": {
+											"value": "@item().SourceTableName",
+											"type": "Expression"
+										}
+									}
+								}
+							]
 						},
 						{
-							"name": "Stored procedure2",
+							"name": "SP_DependentDeltaLoad",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
-									"activity": "Copy data2",
+									"activity": "CP_SourceToStgDependent",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "SAPFunctional",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Stored procedure1",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "SP_DependentDeltaLoad",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -157,6 +326,35 @@
 								"secureInput": false
 							},
 							"userProperties": []
+						},
+						{
+							"name": "LK_DependentDeltaCondtion",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@{concat('SELECT CONCAT(',item().PK_Column,' IN (','''','(SELECT STRING_AGG(',item().PK_Column,''''',''''',''') FROM ',item().SinkSchemaName,'''.''',item().SinkTableName,''')''','''',''')''',')')}",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "DS_DependentDeltaCondition",
+									"type": "DatasetReference"
+								},
+								"firstRowOnly": false
+							}
 						}
 					]
 				}

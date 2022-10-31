@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Lookup1",
+				"name": "LK_SAPFullTable",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -17,6 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT * FROM dbo.SAP_Lookup WHERE LoadType = 'Full'",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -28,11 +29,11 @@
 				}
 			},
 			{
-				"name": "ForEach1",
+				"name": "FE_FullLoad",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Lookup1",
+						"activity": "LK_SAPFullTable",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -40,6 +41,10 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
+					"items": {
+						"value": "@activity('LK_SAPFullTable').output.value",
+						"type": "Expression"
+					},
 					"isSequential": true,
 					"activities": [
 						{
@@ -61,6 +66,10 @@
 								},
 								"sink": {
 									"type": "SqlServerSink",
+									"preCopyScript": {
+										"value": "@{concat('IF OBJECT_ID(','''',item().SinkSchemaName,'.',item().SinkTableName,'''',') IS NOT NULL\nTRUNCATE TABLE ',item().SinkSchemaName,'.',item().SinkTableName)}",
+										"type": "Expression"
+									},
 									"writeBehavior": "insert",
 									"sqlWriterUseTableLock": false,
 									"tableOption": "autoCreate"
