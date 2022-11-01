@@ -266,6 +266,11 @@
 							"typeProperties": {
 								"source": {
 									"type": "SapTableSource",
+									"rfcTableOptions": {
+										"value": "@{activity('LK_DependentDeltaCondtion').output}",
+										"type": "Expression"
+									},
+									"customRfcReadTableFunctionModule": "",
 									"partitionOption": "None"
 								},
 								"enableStaging": false
@@ -343,7 +348,7 @@
 								"source": {
 									"type": "SqlServerSource",
 									"sqlReaderQuery": {
-										"value": "@{concat('SELECT CONCAT(',item().PK_Column,' IN (','''','(SELECT STRING_AGG(',item().PK_Column,''''',''''',''') FROM ',item().SinkSchemaName,'''.''',item().SinkTableName,''')''','''',''')''',')')}",
+										"value": "@{concat('SELECT CONCAT(','''',item().PK_Column,' IN (','''',',','''''''''',',','(SELECT STRING_AGG(',item().PK_Column,',',''''''',''''''',') FROM ',item().SinkSchemaName,'.',item().SinkTableName,')',',','''''''''',',',''')'')')}",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
