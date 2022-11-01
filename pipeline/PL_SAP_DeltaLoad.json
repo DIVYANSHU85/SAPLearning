@@ -267,7 +267,7 @@
 								"source": {
 									"type": "SapTableSource",
 									"rfcTableOptions": {
-										"value": "@{activity('LK_DependentDeltaCondtion').output.value}",
+										"value": "@{activity('LK_DependentDeltaCondtion').output.value[0].String}",
 										"type": "Expression"
 									},
 									"customRfcReadTableFunctionModule": "",
