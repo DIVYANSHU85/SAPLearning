@@ -1,0 +1,105 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "SAPLearningDivyanshu"
+		},
+		"SAPFunctional_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'SAPFunctional'"
+		},
+		"SAPFunctional_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'SAPFunctional'"
+		},
+		"SAPFunctionalTable_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'SAPFunctionalTable'"
+		},
+		"SAPFunctional_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "DESKTOP-LIH9UQE\\divkr"
+		},
+		"SAPFunctionalTable_properties_typeProperties_clientId": {
+			"type": "string",
+			"defaultValue": "100"
+		},
+		"SAPFunctionalTable_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "kjoshi"
+		},
+		"SAPFunctionalTable_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "fas.cognitusconsulting.com"
+		},
+		"SAPFunctionalTable_properties_typeProperties_systemNumber": {
+			"type": "string",
+			"defaultValue": "01"
+		},
+		"SharedSelfIR_properties_typeProperties_linkedInfo_resourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/e4949961-e46f-4f60-bf96-032154cb62b7/resourcegroups/TestEnvironment/providers/Microsoft.DataFactory/factories/ADFDemoDivyanshu/integrationruntimes/selfHostedIRnew"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "SAPLearningDivyanshu_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"SAPFunctional_connectionString": {
+						"value": "[parameters('SAPFunctional_connectionString')]"
+					},
+					"SAPFunctional_password": {
+						"value": "[parameters('SAPFunctional_password')]"
+					},
+					"SAPFunctionalTable_password": {
+						"value": "[parameters('SAPFunctionalTable_password')]"
+					},
+					"SharedSelfIR_properties_typeProperties_linkedInfo_resourceId": {
+						"value": "[parameters('SharedSelfIR_properties_typeProperties_linkedInfo_resourceId')]"
+					},
+					"SAPFunctional_properties_typeProperties_userName": {
+						"value": "[parameters('SAPFunctional_properties_typeProperties_userName')]"
+					},
+					"SAPFunctionalTable_properties_typeProperties_clientId": {
+						"value": "[parameters('SAPFunctionalTable_properties_typeProperties_clientId')]"
+					},
+					"SAPFunctionalTable_properties_typeProperties_userName": {
+						"value": "[parameters('SAPFunctionalTable_properties_typeProperties_userName')]"
+					},
+					"SAPFunctionalTable_properties_typeProperties_server": {
+						"value": "[parameters('SAPFunctionalTable_properties_typeProperties_server')]"
+					},
+					"SAPFunctionalTable_properties_typeProperties_systemNumber": {
+						"value": "[parameters('SAPFunctionalTable_properties_typeProperties_systemNumber')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}

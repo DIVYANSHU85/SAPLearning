@@ -1,0 +1,42 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "SAPLearningDivyanshu"
+		},
+		"SAPFunctional_connectionString": {
+			"value": ""
+		},
+		"SAPFunctional_password": {
+			"value": ""
+		},
+		"SAPFunctionalTable_password": {
+			"value": ""
+		},
+		"SAPFunctional_properties_typeProperties_userName": {
+			"value": "DESKTOP-LIH9UQE\\divkr"
+		},
+		"SAPFunctionalTable_properties_typeProperties_clientId": {
+			"value": "100"
+		},
+		"SAPFunctionalTable_properties_typeProperties_userName": {
+			"value": "kjoshi"
+		},
+		"SAPFunctionalTable_properties_typeProperties_server": {
+			"value": "fas.cognitusconsulting.com"
+		},
+		"SAPFunctionalTable_properties_typeProperties_systemNumber": {
+			"value": "01"
+		},
+		"SharedSelfIR_properties_typeProperties_linkedInfo_resourceId": {
+			"value": "/subscriptions/e4949961-e46f-4f60-bf96-032154cb62b7/resourcegroups/TestEnvironment/providers/Microsoft.DataFactory/factories/ADFDemoDivyanshu/integrationruntimes/selfHostedIRnew"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}
