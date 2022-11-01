@@ -366,7 +366,7 @@
 								"source": {
 									"type": "SqlServerSource",
 									"sqlReaderQuery": {
-										"value": "@{concat('SELECT CONCAT(','''',item().PK_Column,' IN (','''',',','''''''''',',','(SELECT STRING_AGG(',item().PK_Column,',',''''''',''''''',') FROM ',item().SinkSchemaName,'.',item().SinkTableName,')',',','''''''''',',',''')'')',' AS String')}",
+										"value": "@{concat('SELECT CONCAT(','''',item().PK_Column,' IN (','''',',','''''''''',',','(SELECT STRING_AGG(CONVERT(NVARCHAR(max)',',',item().PK_Column,')',',',''''''',''''''',') FROM ',item().SinkSchemaName,'.',item().DependentOn,')',',','''''''''',',',''')'')',' AS String')}",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
