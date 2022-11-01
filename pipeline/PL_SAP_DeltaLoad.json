@@ -42,7 +42,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('LK_SAP').output.value",
+						"value": "@activity('LK_SAPDeltaTable').output.value",
 						"type": "Expression"
 					},
 					"isSequential": true,
@@ -267,11 +267,21 @@
 								"source": {
 									"type": "SapTableSource",
 									"rfcTableOptions": {
-										"value": "@{activity('LK_DependentDeltaCondtion').output}",
+										"value": "@{activity('LK_DependentDeltaCondtion').output.value}",
 										"type": "Expression"
 									},
 									"customRfcReadTableFunctionModule": "",
 									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "SqlServerSink",
+									"preCopyScript": {
+										"value": "@{concat('IF OBJECT_ID(','''',item().SinkSchemaName,'.',item().SinkTableName,'''',') IS NOT NULL\nTRUNCATE TABLE ',item().SinkSchemaName,'.',item().SinkTableName)}",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"tableOption": "autoCreate"
 								},
 								"enableStaging": false
 							},
@@ -282,6 +292,22 @@
 									"parameters": {
 										"TableName": {
 											"value": "@item().SourceTableName",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "DS_DependentTable",
+									"type": "DatasetReference",
+									"parameters": {
+										"SchemaName": {
+											"value": "@item().SinkSchemaName",
+											"type": "Expression"
+										},
+										"TableName": {
+											"value": "@item().SinkTableName",
 											"type": "Expression"
 										}
 									}
@@ -307,30 +333,22 @@
 								"secureInput": false
 							},
 							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[usp_LoadTypeDeltaSTGtoDBO]",
+								"storedProcedureParameters": {
+									"SourceTableName": {
+										"value": {
+											"value": "@item().SourceTableName",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
 							"linkedServiceName": {
 								"referenceName": "SAPFunctional",
 								"type": "LinkedServiceReference"
 							}
-						},
-						{
-							"name": "Stored procedure1",
-							"type": "SqlServerStoredProcedure",
-							"dependsOn": [
-								{
-									"activity": "SP_DependentDeltaLoad",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"policy": {
-								"timeout": "0.12:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": []
 						},
 						{
 							"name": "LK_DependentDeltaCondtion",
@@ -348,7 +366,7 @@
 								"source": {
 									"type": "SqlServerSource",
 									"sqlReaderQuery": {
-										"value": "@{concat('SELECT CONCAT(','''',item().PK_Column,' IN (','''',',','''''''''',',','(SELECT STRING_AGG(',item().PK_Column,',',''''''',''''''',') FROM ',item().SinkSchemaName,'.',item().SinkTableName,')',',','''''''''',',',''')'')')}",
+										"value": "@{concat('SELECT CONCAT(','''',item().PK_Column,' IN (','''',',','''''''''',',','(SELECT STRING_AGG(',item().PK_Column,',',''''''',''''''',') FROM ',item().SinkSchemaName,'.',item().SinkTableName,')',',','''''''''',',',''')'')',' AS String')}",
 										"type": "Expression"
 									},
 									"queryTimeout": "02:00:00",
