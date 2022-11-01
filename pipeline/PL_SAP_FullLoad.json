@@ -191,7 +191,7 @@
 								"storedProcedureParameters": {
 									"ModifiedDate": {
 										"value": {
-											"value": "@pipeline().TriggerTime",
+											"value": "@pipeline().parameters.PipelineTriggerTime",
 											"type": "Expression"
 										},
 										"type": "DateTime"
@@ -214,6 +214,11 @@
 				}
 			}
 		],
+		"parameters": {
+			"PipelineTriggerTime": {
+				"type": "string"
+			}
+		},
 		"annotations": []
 	}
 }

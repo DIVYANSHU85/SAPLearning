@@ -3,36 +3,24 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "LK_LoadType",
-				"type": "Lookup",
+				"name": "SV_TriggerTime",
+				"type": "SetVariable",
 				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "SqlServerSource",
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
-					},
-					"dataset": {
-						"referenceName": "LookUpTable",
-						"type": "DatasetReference"
-					},
-					"firstRowOnly": false
+					"variableName": "PipelineTriggerTime",
+					"value": {
+						"value": "@pipeline().TriggerTime",
+						"type": "Expression"
+					}
 				}
 			},
 			{
-				"name": "FE_LoadTypeExecution",
-				"type": "ForEach",
+				"name": "EX_PL_SAP_FullLoad",
+				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "LK_LoadType",
+						"activity": "SV_TriggerTime",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -40,58 +28,51 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
-					"items": {
-						"value": "@activity('LK_LoadType').output.value",
-						"type": "Expression"
+					"pipeline": {
+						"referenceName": "PL_SAP_FullLoad",
+						"type": "PipelineReference"
 					},
-					"isSequential": true,
-					"activities": [
-						{
-							"name": "IF_LoadType",
-							"type": "IfCondition",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"expression": {
-									"value": "@equals(item().LoadType,'Full')",
-									"type": "Expression"
-								},
-								"ifFalseActivities": [
-									{
-										"name": "EX_PL_SAP_DeltaLoad",
-										"type": "ExecutePipeline",
-										"dependsOn": [],
-										"userProperties": [],
-										"typeProperties": {
-											"pipeline": {
-												"referenceName": "PL_SAP_DeltaLoad",
-												"type": "PipelineReference"
-											},
-											"waitOnCompletion": true
-										}
-									}
-								],
-								"ifTrueActivities": [
-									{
-										"name": "EX_PL_SAP_FullLoad",
-										"type": "ExecutePipeline",
-										"dependsOn": [],
-										"userProperties": [],
-										"typeProperties": {
-											"pipeline": {
-												"referenceName": "PL_SAP_FullLoad",
-												"type": "PipelineReference"
-											},
-											"waitOnCompletion": true
-										}
-									}
-								]
-							}
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineTriggerTime": {
+							"value": "@variables('PipelineTriggerTime')",
+							"type": "Expression"
 						}
-					]
+					}
+				}
+			},
+			{
+				"name": "EX_PL_SAP_DeltaLoad",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "SV_TriggerTime",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PL_SAP_DeltaLoad",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"PipelineTriggerTime": {
+							"value": "@variables('PipelineTriggerTime')",
+							"type": "Expression"
+						}
+					}
 				}
 			}
 		],
+		"variables": {
+			"PipelineTriggerTime": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }

@@ -170,7 +170,7 @@
 								"storedProcedureParameters": {
 									"ModifiedDate": {
 										"value": {
-											"value": "@pipeline().TriggerTime",
+											"value": "@pipeline().parameters.PipelineTriggerTime",
 											"type": "Expression"
 										},
 										"type": "DateTime"
@@ -378,11 +378,64 @@
 								},
 								"firstRowOnly": false
 							}
+						},
+						{
+							"name": "SP_UpdateMD",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "SP_DependentDeltaLoad",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[usp_UpdateDeltaCondition]",
+								"storedProcedureParameters": {
+									"ModifiedDate": {
+										"value": {
+											"value": "@pipeline().parameters.PipelineTriggerTime",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"SourceTableName": {
+										"value": {
+											"value": "@item().SourceTableName",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "SAPFunctional",
+								"type": "LinkedServiceReference"
+							}
 						}
 					]
 				}
 			}
 		],
+		"parameters": {
+			"PipelineTriggerTime": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"PipelineTriggerTime": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }
