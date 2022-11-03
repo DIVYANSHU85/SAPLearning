@@ -209,6 +209,79 @@
 								"referenceName": "SAPFunctional",
 								"type": "LinkedServiceReference"
 							}
+						},
+						{
+							"name": "SP_AuditLog",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "CP_Full_StgToDbo",
+									"dependencyConditions": [
+										"Completed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[etl].[usp_AuditLog]",
+								"storedProcedureParameters": {
+									"CopyDuration": {
+										"value": "",
+										"type": "Int32"
+									},
+									"Error": {
+										"value": "",
+										"type": "String"
+									},
+									"ExecutionTime": {
+										"value": "",
+										"type": "DateTime"
+									},
+									"PipelineName": {
+										"value": "",
+										"type": "String"
+									},
+									"PipelineRunID": {
+										"value": "",
+										"type": "String"
+									},
+									"RowsCopied": {
+										"value": "",
+										"type": "Int32"
+									},
+									"RowsRead": {
+										"value": "",
+										"type": "Int32"
+									},
+									"SourceName": {
+										"value": "",
+										"type": "String"
+									},
+									"Status": {
+										"value": "",
+										"type": "String"
+									},
+									"TargetSchemaName": {
+										"value": "",
+										"type": "String"
+									},
+									"TargetTableName": {
+										"value": "",
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "SAPFunctional",
+								"type": "LinkedServiceReference"
+							}
 						}
 					]
 				}

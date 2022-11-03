@@ -132,6 +132,13 @@
 							"typeProperties": {
 								"storedProcedureName": "[dbo].[usp_LoadTypeDeltaSTGtoDBO]",
 								"storedProcedureParameters": {
+									"ModifiedDate": {
+										"value": {
+											"value": "@pipeline().parameters.PipelineTriggerTime",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
 									"SourceTableName": {
 										"value": {
 											"value": "@item().SourceTableName",
@@ -147,13 +154,13 @@
 							}
 						},
 						{
-							"name": "SP_UpdateDeltaCondition",
+							"name": "SP_Delta_AuditLog",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
 									"activity": "SP_DeltaLoad",
 									"dependencyConditions": [
-										"Succeeded"
+										"Completed"
 									]
 								}
 							],
@@ -166,20 +173,54 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[usp_UpdateDeltaCondition]",
+								"storedProcedureName": "[etl].[usp_AuditLog]",
 								"storedProcedureParameters": {
-									"ModifiedDate": {
-										"value": {
-											"value": "@pipeline().parameters.PipelineTriggerTime",
-											"type": "Expression"
-										},
+									"CopyDuration": {
+										"value": "",
+										"type": "Int32"
+									},
+									"Error": {
+										"value": "",
+										"type": "String"
+									},
+									"ExecutionTime": {
+										"value": "",
 										"type": "DateTime"
 									},
-									"SourceTableName": {
-										"value": {
-											"value": "@item().SourceTableName",
-											"type": "Expression"
-										},
+									"ModifiedDate": {
+										"value": "",
+										"type": "DateTime"
+									},
+									"PipelineName": {
+										"value": "",
+										"type": "String"
+									},
+									"PipelineRunID": {
+										"value": "",
+										"type": "String"
+									},
+									"RowsCopied": {
+										"value": "",
+										"type": "Int32"
+									},
+									"RowsRead": {
+										"value": "",
+										"type": "Int32"
+									},
+									"SourceName": {
+										"value": "",
+										"type": "String"
+									},
+									"Status": {
+										"value": "",
+										"type": "String"
+									},
+									"TargetSchemaName": {
+										"value": "",
+										"type": "String"
+									},
+									"TargetTableName": {
+										"value": "",
 										"type": "String"
 									}
 								}
@@ -336,6 +377,13 @@
 							"typeProperties": {
 								"storedProcedureName": "[dbo].[usp_LoadTypeDeltaSTGtoDBO]",
 								"storedProcedureParameters": {
+									"ModifiedDate": {
+										"value": {
+											"value": "@pipeline().parameters.PipelineTriggerTime",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
 									"SourceTableName": {
 										"value": {
 											"value": "@item().SourceTableName",
@@ -380,13 +428,13 @@
 							}
 						},
 						{
-							"name": "SP_UpdateMD",
+							"name": "SP_AuditLog",
 							"type": "SqlServerStoredProcedure",
 							"dependsOn": [
 								{
 									"activity": "SP_DependentDeltaLoad",
 									"dependencyConditions": [
-										"Succeeded"
+										"Completed"
 									]
 								}
 							],
@@ -399,20 +447,54 @@
 							},
 							"userProperties": [],
 							"typeProperties": {
-								"storedProcedureName": "[dbo].[usp_UpdateDeltaCondition]",
+								"storedProcedureName": "[etl].[usp_AuditLog]",
 								"storedProcedureParameters": {
-									"ModifiedDate": {
-										"value": {
-											"value": "@pipeline().parameters.PipelineTriggerTime",
-											"type": "Expression"
-										},
+									"CopyDuration": {
+										"value": "",
+										"type": "Int32"
+									},
+									"Error": {
+										"value": "",
+										"type": "String"
+									},
+									"ExecutionTime": {
+										"value": "",
 										"type": "DateTime"
 									},
-									"SourceTableName": {
-										"value": {
-											"value": "@item().SourceTableName",
-											"type": "Expression"
-										},
+									"ModifiedDate": {
+										"value": "",
+										"type": "DateTime"
+									},
+									"PipelineName": {
+										"value": "",
+										"type": "String"
+									},
+									"PipelineRunID": {
+										"value": "",
+										"type": "String"
+									},
+									"RowsCopied": {
+										"value": "",
+										"type": "Int32"
+									},
+									"RowsRead": {
+										"value": "",
+										"type": "Int32"
+									},
+									"SourceName": {
+										"value": "",
+										"type": "String"
+									},
+									"Status": {
+										"value": "",
+										"type": "String"
+									},
+									"TargetSchemaName": {
+										"value": "",
+										"type": "String"
+									},
+									"TargetTableName": {
+										"value": "",
 										"type": "String"
 									}
 								}
@@ -429,11 +511,6 @@
 		"parameters": {
 			"PipelineTriggerTime": {
 				"type": "string"
-			}
-		},
-		"variables": {
-			"PipelineTriggerTime": {
-				"type": "String"
 			}
 		},
 		"annotations": []
